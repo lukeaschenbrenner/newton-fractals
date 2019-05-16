@@ -8,9 +8,7 @@ This is Java code for an application which enables visualization of fractals gen
 Newton fractals are a visual representation of a process called the Newton's method used to find the roots (or zeroes) of a function, ![f(z_n)](https://latex.codecogs.com/svg.latex?f%28z_n%29).
 This method starts with a guess ![z0](https://latex.codecogs.com/svg.latex?z_0) and then iterates the following expression until the values either converge or fail to converge:
 
-<center>
 ![equation](https://latex.codecogs.com/svg.latex?z_%7Bn&plus;1%7D%20%3D%20z_n%20&plus;%20%5Cfrac%7Bf%28z_b%29%7D%7Bf%27%28z_n%29%7D)
-</center>
 
 where ![zn](https://latex.codecogs.com/svg.latex?z_n) is n-th guess root point, ![f(z_n)](https://latex.codecogs.com/svg.latex?f%28z_n%29) is function value at ![zn](https://latex.codecogs.com/svg.latex?z_n), ![f'(z_n)](https://latex.codecogs.com/svg.latex?f%27%28z_n%29) is function's derivative value at ![zn](https://latex.codecogs.com/svg.latex?z_n). You use this expression like this: first you guess a possible root and define it as ![z0](https://latex.codecogs.com/svg.latex?z_0), then you use this expression and obtain ![z1](https://latex.codecogs.com/svg.latex?z_1), now you can check precision of guessed root ![dz=|z_1-z_0|](https://latex.codecogs.com/svg.latex?dz%20%3D%20%7Cz_1%20-%20z_0%7C), if ![dz](https://latex.codecogs.com/svg.latex?dz) satisfies you then you can claim that ![z1](https://latex.codecogs.com/svg.latex?z_1) is root with precision ![dz](https://latex.codecogs.com/svg.latex?dz). Note that you can iterate as long as you want, the more iterations the more precise root you get. However, for every polynomial of degree at least 2 there are points for which the Newton's method does not converge to any root.
 
