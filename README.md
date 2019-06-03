@@ -1,7 +1,7 @@
 
 # Newton Fractal Explorer #
 
-This is Java code for an application which enables visualization of fractals generated using Newton's method. It only supports simple polynomials with maximum degree of 9 with non negative integer exponents and real coefficients.
+This is Java code for an application which enables visualization of fractals generated using Newton's method. It only supports simple polynomials with maximum degree of 9 with real coefficients.
 
 ## About
 
