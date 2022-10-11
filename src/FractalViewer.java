@@ -17,7 +17,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 public class FractalViewer extends JPanel implements ActionListener, PropertyChangeListener {
 
@@ -27,7 +30,7 @@ public class FractalViewer extends JPanel implements ActionListener, PropertyCha
 	public static JScrollPane previewScrollPane;
 
 	public static JTextField z0Field, z1Field, z2Field, z3Field, z4Field, z5Field, z6Field, z7Field, z8Field, z9Field;
-	public static JButton genButton;
+	public static JButton genButton, printButton;
 	public static ProgressMonitor progressMonitor;
 	public NewtonFractal operation;
 
@@ -39,18 +42,18 @@ public class FractalViewer extends JPanel implements ActionListener, PropertyCha
 		JPanel settingsPanel = new JPanel();
 		settingsPanel.setFocusable(true);
 
-		JLabel equationFieldLabel = new JLabel("Equation:");
+		JLabel equationFieldLabel = new JLabel("Your name:");
 		settingsPanel.add(equationFieldLabel);
 
 
-		z9Field = new JTextField(2);
-		z9Field.setText("0");
+		z9Field = new JTextField(20);
+		z9Field.setText("");
 		z9Field.setHorizontalAlignment(JTextField.RIGHT);
-		JLabel z9Label = new JLabel("z⁹ +");
+		//JLabel z9Label = new JLabel("z⁹ +");
 		settingsPanel.add(z9Field);
-		settingsPanel.add(z9Label);
+	//	settingsPanel.add(z9Label);
 
-		z8Field = new JTextField(2);
+/*		z8Field = new JTextField(2);
 		z8Field.setText("0");
 		z8Field.setHorizontalAlignment(JTextField.RIGHT);
 		JLabel z8Label = new JLabel("z⁸ +");
@@ -111,11 +114,19 @@ public class FractalViewer extends JPanel implements ActionListener, PropertyCha
 		z0Field.setHorizontalAlignment(JTextField.RIGHT);
 		settingsPanel.add(z0Field);
 
+ */
+
 		genButton = new JButton("Generate");
 		genButton.setActionCommand("generate");
 		genButton.addActionListener(this);
 
 		settingsPanel.add(genButton);
+
+		printButton = new JButton("Print\uD83D\uDDA8");
+		printButton.setActionCommand("print");
+		printButton.addActionListener(this);
+
+		settingsPanel.add(printButton);
 
 		previewScrollPane = new JScrollPane();
 
@@ -130,17 +141,28 @@ public class FractalViewer extends JPanel implements ActionListener, PropertyCha
 	public void actionPerformed(ActionEvent event) {
 		if ("generate".equals(event.getActionCommand())) {
 			try {
-				coefficients[0] = Double.parseDouble(z0Field.getText());
-				coefficients[1] = Double.parseDouble(z1Field.getText());
-				coefficients[2] = Double.parseDouble(z2Field.getText());
-				coefficients[3] = Double.parseDouble(z3Field.getText());
-				coefficients[4] = Double.parseDouble(z4Field.getText());
-				coefficients[5] = Double.parseDouble(z5Field.getText());
-				coefficients[6] = Double.parseDouble(z6Field.getText());
-				coefficients[7] = Double.parseDouble(z7Field.getText());
-				coefficients[8] = Double.parseDouble(z8Field.getText());
-				coefficients[9] = Double.parseDouble(z9Field.getText());
+				char[] nameChars = z9Field.getText().toLowerCase().toCharArray();
+				if(nameChars.length > 10){
+					for(int i = 10; i < nameChars.length; i++){
+						nameChars[i % 10] = (Character.toLowerCase((char)(nameChars[i % 10] + nameChars[i])));
+					}
+				}
 
+				for(int i = 0; i < 10 && i < nameChars.length; i++){
+					//coefficients[i] = (double)(((nameChars[i])-96.0) % 50);
+					coefficients[i] = (double)(((nameChars[i])-110.0) % 50);
+				}
+				for(int i = nameChars.length; i < 10; i++){
+					coefficients[i] = 0;
+				}
+				if(nameChars.length <= 3){
+					coefficients[4] = coefficients[0];
+					coefficients[5] = coefficients[0];
+					coefficients[6] = coefficients[0];
+				}
+
+
+				System.out.println(Arrays.toString(coefficients));
 				double absCoeffSum = 0;
 				for (int i = 9; i > 1; i--) {
 					absCoeffSum += Math.abs(coefficients[i]);
@@ -153,10 +175,11 @@ public class FractalViewer extends JPanel implements ActionListener, PropertyCha
 					return;
 				}
 
-				progressMonitor = new ProgressMonitor(FractalViewer.this, "Generating fractal...", "",0, 100);
+				progressMonitor = new ProgressMonitor(FractalViewer.this, "Generating fractal...\uD83C\uDF83\uD83C\uDF83\uD83C\uDF83", "",0, 100);
 				progressMonitor.setProgress(0);
 
-				operation = new NewtonFractal(DEFAULT_WIDTH-4, DEFAULT_WIDTH-65, new Polynomial(coefficients));
+		//		operation = new NewtonFractal(DEFAULT_WIDTH-4, DEFAULT_WIDTH-65, new Polynomial(coefficients));
+				operation = new NewtonFractal(1100, 850, new Polynomial(coefficients));
 				operation.addPropertyChangeListener(this);
 				operation.execute();
 
@@ -169,11 +192,27 @@ public class FractalViewer extends JPanel implements ActionListener, PropertyCha
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}else if("print".equals(event.getActionCommand())){
+			try {
+				new Thread(new PrintActionListener(operation.get())).start();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this,
+						"The printer execution failed. Luke is sorry.",
+						"Error", JOptionPane.ERROR_MESSAGE);			}
+			catch (NullPointerException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this,
+						"You can't print a blank image!",
+						"Error", JOptionPane.ERROR_MESSAGE);			}
 		}
 	}
 
-	public static void setFieldsEnabled(boolean b) {
 
+	public static void setFieldsEnabled(boolean b) {
+/*
 		z0Field.setEnabled(b);
 		z1Field.setEnabled(b);
 		z2Field.setEnabled(b);
@@ -182,10 +221,11 @@ public class FractalViewer extends JPanel implements ActionListener, PropertyCha
 		z5Field.setEnabled(b);
 		z6Field.setEnabled(b);
 		z7Field.setEnabled(b);
-		z8Field.setEnabled(b);
+		z8Field.setEnabled(b); */
 		z9Field.setEnabled(b);
 
 		genButton.setEnabled(b);
+		printButton.setEnabled(b);
 	}
 
 	@Override
@@ -199,6 +239,7 @@ public class FractalViewer extends JPanel implements ActionListener, PropertyCha
 
 		if (operation.isDone()) {
 			try {
+
 				previewScrollPane.getViewport().add(new JLabel(new ImageIcon(operation.get())));
 			} catch (CancellationException e) {
 				// Fails silently
@@ -222,7 +263,7 @@ public class FractalViewer extends JPanel implements ActionListener, PropertyCha
 	}
 
 	private static void createAndShowGUI() {
-		JFrame frame = new JFrame("Newton Fractal Explorer");
+		JFrame frame = new JFrame("Spooky Science Bash 2022 - Newton Fractal Generator");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
